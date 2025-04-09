@@ -28,10 +28,16 @@
 % Package for removing paragraph identations
 \usepackage{parskip}
 \setlength\columnsep{18pt}
-% Sets bastract
 \renewenvironment{abstract}
- {\par\noindent\textbf{\abstractname}\ \ignorespaces \\}
- {\par\noindent\medskip}
+ {\begin{center}
+    \Large\bfseries Abstract
+    \end{center}
+    \begin{center}
+    \begin{minipage}{0.8\textwidth}
+    \small}
+ {\end{minipage}
+  \end{center}
+  \medskip}
  
 \begin{document}
 % Makes header
@@ -42,7 +48,7 @@
 % Makes footnotes with an asterisk
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 \begin{center}
-\Large{\textbf{Real-time Precision in Biomedical Science: An In-Depth Study of YOLOv bla’s Applications and Impact}}
+\Large{\textbf{YOLO's Real-time Applications and Impact: An In-Depth Feasibility Study of Cell Detection and Fruit Ripeness Determination}}
 \vspace{0.4cm}
 \normalsize
 \\ Yiyuan Li, Min Thu Khaing, Thet Paing Hmu, Rauan Zholaman, Aung Khant Kyaw \\
