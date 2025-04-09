@@ -1,6 +1,20 @@
 \begin{multicols}{2}
 	\section{Introduction}
-	Object detection has rapidly evolved over the past decade, becoming one of the most impactful technologies within computer vision. Central to this advancement is the You Only Look Once (YOLO) series of models, first introduced by \citet{redmon2016lookonceunifiedrealtime}, which revolutionized object detection by offering real-time performance combined with remarkable accuracy.
-	YOLO fundamentally shifted the paradigm from slower, two-stage approaches, such as R-CNN, to an efficient single-stage detection method that processes an entire image with a single neural network pass.
-	Since its initial release, YOLO has undergone several iterations, with significant improvements in each version. YOLOv2 and YOLO9000 \citep{redmon2017yolo9000} offered better accuracy while maintaining real-time performance. YOLOv3 \citep{redmon2018yolov3} further refined the architecture with multi-scale predictions. More recently, YOLOv4 \citep{bochkovskiy2020yolov4} optimized the balance between speed and accuracy.
+	Object detection is a basic task in computer vision, with uses in self-driving cars, security systems, and medical testing. Finding and placing objects in pictures has changed many fields by making new kinds of automation work \citep{8627998}. Among many object detection systems, YOLO (You Only Look Once) stands out for its fast processing.
+
+	Unlike older two-step methods like R-CNN and Fast R-CNN that first find areas that might have objects and then sort them \citep{7410526}, YOLO turns object detection into a math problem that finds boxes and object types in one step. This new way of working, first shown by \citet{redmon2016lookonceunifiedrealtime}, changed how fast computers can check images while still being correct. Later versions such as YOLO9000 \citep{8100173}, YOLOv3 \citep{redmon2018yolov3}, and YOLOv4 \citep{bochkovskiy2020yolov4} have made this method work better.
+
+	This way of finding objects helps in many real jobs. In medicine, where finding and sorting cells matters for testing and study, YOLO can cut down on hand-counting work \citep{Chan2020}. In farming, seeing if fruit is ripe helps pick at the right time, cuts waste, and makes better food \citep{Koirala2019}.
+
+	Our work looks at how well YOLO works for these two jobs: finding cells in medical pictures and checking fruit ripeness. Each field brings its own tests. Medical work needs exact results with small objects \citep{electronics8030292}, while farm uses must work outside with changing light and busy backgrounds \citep{KAMILARIS201870}.
+
+	We study these main questions:
+	\begin{enumerate}
+		\item How has YOLO changed over time to work better for these jobs?
+		\item How well does YOLO find cells and check fruit ripeness next to other ways?
+		\item What changes to YOLO make it work better for these two jobs?
+		\item What problems need fixing for real-world use?
+	\end{enumerate}
+
+	By testing YOLO and looking at other options, we want to show where it works, where it doesn't, and what it could mean for these fields. Our results should help both those who study how to find objects in pictures and those who want to use these systems in medical industry and agriculture.
 \end{multicols}
