@@ -1,3 +1,6 @@
+# build folder
+build/
+
 # LaTeX intermediate and output files
 *.aux
 *.log

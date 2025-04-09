@@ -1,6 +1,7 @@
 \documentclass[a4paper,12pt]{article}
 % Package to make citations superscrit with brackets
-\usepackage[super,square]{natbib}
+\usepackage[round,authoryear,semicolon]{natbib}
+\setcitestyle{aysep={,}}
 % Package to change margin size
 \usepackage{anysize}
 \marginsize{2cm}{2cm}{1cm}{2cm}
@@ -63,6 +64,6 @@
 \input{./sections/4_experimental_evaluation.tex}
 \input{./sections/5_advantages_and_limitations.tex}
 \input{./sections/6_future_directions_and_conclusion.tex}
-\bibliographystyle{plain}
+\bibliographystyle{apalike}
 \bibliography{references}
 \end{document}
