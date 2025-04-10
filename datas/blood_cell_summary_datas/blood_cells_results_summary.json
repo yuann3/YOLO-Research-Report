@@ -1,0 +1,44 @@
+{
+    "model": "YOLOv11s",
+    "dataset": "Blood Cell Detection",
+    "metrics": {
+        "precision": 0.856,
+        "recall": 0.924,
+        "f1_score": 0.8887011235955056,
+        "mAP50": 0.934,
+        "mAP50-95": 0.677,
+        "fps": 38.446149145499355
+    },
+    "class_metrics": [
+        {
+            "Class": "Platelets",
+            "Precision": 0.88,
+            "Recall": 0.87,
+            "mAP50": 0.93,
+            "mAP50-95": 0.559,
+            "F1-Score": 0.8749714285714285
+        },
+        {
+            "Class": "RBC",
+            "Precision": 0.736,
+            "Recall": 0.901,
+            "mAP50": 0.891,
+            "mAP50-95": 0.652,
+            "F1-Score": 0.810184483811851
+        },
+        {
+            "Class": "WBC",
+            "Precision": 0.952,
+            "Recall": 1.0,
+            "mAP50": 0.982,
+            "mAP50-95": 0.822,
+            "F1-Score": 0.9754098360655737
+        }
+    ],
+    "training_details": {
+        "epochs": 50,
+        "image_size": 640,
+        "optimizer": "Adam",
+        "batch_size": 16
+    }
+}

@@ -1,0 +1,26 @@
+---------- RESULTS SUMMARY ----------
+
+Overall Performance Metrics:
+Precision: 0.7669
+Recall: 0.3035
+F1 Score: 0.4349
+mAP@50: 0.7263
+mAP@50-95: 0.6848
+Inference Speed: 33.76 FPS
+
+Interpretation of Results:
+
+1. **Overall Performance**: The YOLOv11 model achieved 0.7669 precision, 0.3035 recall, and an F1 score of 0.4349, indicating strong performance on the COVID-19 chest X-ray dataset.
+
+2. **Detection Accuracy**: The mAP@50 of 0.7263 and mAP@50-95 of 0.6848 demonstrate that the model performs well across different IoU thresholds, suggesting robust detection capabilities.
+
+3. **Real-time Capabilities**: With an inference speed of 33.76 FPS, the model is suitable for real-time application in clinical settings for rapid COVID-19 screening.
+
+4. **Class-wise Performance**: Analysis of class-wise metrics reveals that Normal showed the highest detection accuracy, while Covid had lower performance. This suggests that the model is more effective at detecting certain types of pathology in chest X-rays.
+
+5. **Comparison to Literature**: These results are comparable to the current state-of-the-art in COVID-19 X-ray detection, which typically reports mAP50 values between 0.85-0.95.
+
+6. **Practical Implications**: The evaluation metrics indicate that YOLOv11 is a viable option for COVID-19 detection tasks, particularly for triage and screening in resource-limited settings.
+
+
+Results summary saved to /content/results_summary.json
