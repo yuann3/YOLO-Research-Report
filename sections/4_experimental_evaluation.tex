@@ -6,86 +6,35 @@
 \end{center}
 {\color{gray}\hrule}
 \begin{multicols}{2}
-\subsection{Experimental Setup}
 
+\subsection{Experimental Setup}
 In this section, we present a comprehensive evaluation of YOLO v11's performance in two distinct industries: biomedicine and agriculture. We examined three specific applications: COVID-19 detection using chest X-rays, blood cell detection and classification, and fruit ripeness determination. These applications were chosen to represent diverse real-world scenarios with varying levels of complexity, object characteristics, and practical significance.
 
 \subsubsection{COVID-19 Chest X-ray Dataset}
+For COVID-19 detection, we utilized the COVID-19 Image Dataset from Kaggle \citep{Raikokte2020}, which contains X-ray images categorized into three classes: COVID-19 positive cases, normal cases, and viral pneumonia cases. The dataset was prepared with particular attention to medical imaging requirements. Our dataset comprised 158 training images, 25 validation images, and 24 test images across three classes: Covid (0), Normal (1), and Viral Pneumonia (2). The images were grayscale chest X-rays with varying dimensions, and we converted annotations to YOLO format with central bounding boxes covering the regions of interest.
 
-For COVID-19 detection, we utilized the COVID-19 Image Dataset from Kaggle \citep{Raikokte2020}, which contains X-ray images categorized into three classes: COVID-19 positive cases, normal cases, and viral pneumonia cases. The dataset was prepared with particular attention to medical imaging requirements:
-\begin{itemize}
-    \item \textbf{Dataset Size}: 158 training images, 25 validation images, and 24 test images
-    \item \textbf{Classes}: Covid (0), Normal (1), Viral Pneumonia (2)
-    \item \textbf{Image Properties}: Grayscale chest X-ray images with varying dimensions
-    \item \textbf{Annotation Format}: Converted to YOLO format with central bounding boxes covering the region of interest
-\end{itemize}
 Given the specialized nature of medical imaging and the relatively small dataset size, we implemented careful training strategies to prevent overfitting while ensuring the model could detect subtle radiological patterns associated with COVID-19 infection.
 
 \subsubsection{Blood Cell Detection Dataset}
-
-For the blood cell detection task, we utilized the Blood Cell Detection dataset from Roboflow (version 3), containing microscopic images of blood samples with annotations for three types of blood cells:
-
-\begin{itemize}
-    \item \textbf{Dataset Size}: A comprehensive collection with sufficient samples for robust training
-    \item \textbf{Classes}: Platelets, Red Blood Cells (RBC), and White Blood Cells (WBC)
-    \item \textbf{Image Properties}: High-resolution microscopy images with clearly visible cellular structures
-    \item \textbf{Annotation Characteristics}: Precise bounding box annotations around individual cells
-\end{itemize}
+For the blood cell detection task, we utilized the Blood Cell Detection dataset from Roboflow (version 3), containing microscopic images of blood samples with annotations for three types of blood cells. This comprehensive collection provided sufficient samples for robust training across three classes: Platelets, Red Blood Cells (RBC), and White Blood Cells (WBC). The dataset featured high-resolution microscopy images with clearly visible cellular structures and precise bounding box annotations around individual cells.
 
 This dataset represents a challenging scenario for object detection due to the presence of numerous, often overlapping cells with varying sizes and the need for high precision in medical diagnostics.
 
 \subsubsection{Fruit Ripeness Dataset}
-
-For agricultural applications, we focused on fruit ripeness detection using the "Fruits Fresh and Rotten for Classification" dataset, containing images of fresh and rotten fruits of three different types:
-
-\begin{itemize}
-    \item \textbf{Classes}: Six categories - Fresh Apple, Fresh Banana, Fresh Orange, Rotten Apple, Rotten Banana, and Rotten Orange
-    \item \textbf{Image Properties}: RGB images of individual fruits against various backgrounds
-    \item \textbf{Dataset Distribution}: Balanced representation across all six categories (approximately 1,500-2,200 instances per class)
-\end{itemize}
+For agricultural applications, we focused on fruit ripeness detection using the "Fruits Fresh and Rotten for Classification" dataset, containing images of fresh and rotten fruits of three different types. The dataset included six categories: Fresh Apple, Fresh Banana, Fresh Orange, Rotten Apple, Rotten Banana, and Rotten Orange. The RGB images captured individual fruits against various backgrounds with balanced representation across all six categories (approximately 1,500-2,200 instances per class).
 
 To enhance the model's ability to detect ripeness-related features, we implemented a specialized Roughness-Local Binary Pattern (R-LBP) preprocessing technique that improved texture distinction between fresh and rotten fruits.
 
 \subsubsection{Model Configurations}
+We configured YOLO v11 differently for each application based on dataset characteristics and application requirements. For COVID-19 X-ray detection, we employed the YOLO v11m (medium) variant with 640×640 pixel input resolution, batch size of 16, and 20 training epochs. We used Adam optimizer with a learning rate of 1e-5 and implemented limited augmentation: rotation (0°), horizontal flip (0.5), translation (0.1), and scale (0.1). Notably, we disabled mosaic and mixup augmentations, which are typically unsuitable for medical images.
 
-We configured YOLO v11 differently for each application based on dataset characteristics and application requirements:
+For blood cell detection, we utilized the larger YOLO v11l variant, maintaining the 640×640 pixel input resolution and batch size of 16, but extending training to 80 epochs with a learning rate of 0.01. We conducted training on a single NVIDIA A100 GPU and implemented standard augmentations including mosaic (1.0) and horizontal flip (0.5).
 
-\textbf{COVID-19 X-ray Detection}:
-\begin{itemize}
-    \item Model Variant: YOLO v11m (medium)
-    \item Input Resolution: 640×640 pixels
-    \item Batch Size: 16
-    \item Epochs: 20
-    \item Optimizer: Adam with learning rate 1e-5
-    \item Augmentation: Limited rotation (0°), horizontal flip (0.5), translation (0.1), and scale (0.1)
-    \item Special Considerations: Disabled mosaic and mixup augmentations, which are typically unsuitable for medical images
-\end{itemize}
-
-\textbf{Blood Cell Detection}:
-\begin{itemize}
-    \item Model Variant: YOLO v11l (large)
-    \item Input Resolution: 640×640 pixels
-    \item Batch Size: 16
-    \item Epochs: 80
-    \item Learning Rate: 0.01
-    \item Hardware: Single NVIDIA A100 GPU
-    \item Augmentation: Standard augmentations including mosaic (1.0) and horizontal flip (0.5)
-\end{itemize}
-
-\textbf{Fruit Ripeness Detection}:
-\begin{itemize}
-    \item Model Variant: YOLO v11n (nano)
-    \item Input Resolution: 640×640 pixels
-    \item Batch Size: 16
-    \item Epochs: 30
-    \item Preprocessing: R-LBP technique for texture enhancement
-    \item Optimizer: Auto-selected based on dataset characteristics
-\end{itemize}
+The fruit ripeness detection task employed the lightweight YOLO v11n (nano) variant with the same input resolution (640×640 pixels) and batch size (16), trained for 30 epochs. We applied our R-LBP technique for texture enhancement during preprocessing and utilized an optimizer auto-selected based on dataset characteristics.
 
 Each configuration was chosen to optimize the model's performance for the specific task while considering computational efficiency and the unique characteristics of each dataset.
 
 \subsection{Quantitative Results}
-
 We evaluated each model's performance using standard object detection metrics: precision, recall, F1-score, mean Average Precision at 50\% IoU threshold (mAP@50), mean Average Precision across IoU thresholds from 50\% to 95\% (mAP@50-95), and inference speed in Frames Per Second (FPS).
 
 To rigorously evaluate model performance across applications, we employed these metrics as defined mathematically:
@@ -100,6 +49,7 @@ To rigorously evaluate model performance across applications, we employed these 
 \end{multicols}
 
 \subsubsection{COVID-19 X-ray Detection Results}
+
 
 \begin{table}[ht]
 \centering
@@ -119,6 +69,7 @@ FPS & 33.76 \\ \hline
 \label{tab:covid_results}
 \end{table}
 
+
 \begin{multicols}{2}
 The YOLO v11m model showed promising performance on the COVID-19 X-ray dataset, as summarized in Table \ref{tab:covid_results}.
 
@@ -129,12 +80,17 @@ The class-wise performance analysis revealed significant variations across the t
 The confusion matrix analysis (Figure \ref{fig:covid_confusion}) indicated a tendency for the model to misclassify some COVID-19 cases as Viral Pneumonia, which is understandable given the radiological similarities between these conditions. This suggests that while the model has learned to distinguish normal X-rays effectively, it requires further refinement to reliably differentiate between pathological conditions with similar radiographic presentations.
 \end{multicols}
 
+\vspace{0.5in}
+
 \begin{figure}[ht]
-\centering
-\includegraphics[width=0.8\linewidth]{datas/x_ray_summary_datas/x_ray_confusion_matrix_normalized.png}
-\caption{Confusion Matrix for COVID-19 X-ray Classification}
-\label{fig:covid_confusion}
+    \centering
+    \includegraphics[width=1\textwidth]{datas/x_ray_summary_datas/x_ray_confusion_matrix_normalized.png}
+    \caption{Result for Chest X-Ray Detection}
+    \label{fig:covid_confusion}
 \end{figure}
+
+\vspace{0.5in}
+
 
 \subsubsection{Blood Cell Detection Results}
 
@@ -162,16 +118,16 @@ The blood cell detection task yielded significantly better results, as detailed 
 Class-wise analysis revealed that White Blood Cells (WBC) were detected with exceptional accuracy (precision: 0.952, recall: 1.000, F1-score: 0.975), likely due to their distinctive size and morphology. Red Blood Cells (RBC) proved more challenging with lower precision (0.736) but good recall (0.901), reflecting the difficulty in distinguishing individual RBCs in densely packed microscopy images. Platelets achieved balanced performance with precision and recall both around 0.87-0.88.
 \end{multicols}
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.9\linewidth]{datas/blood_cell_summary_datas/blood_cells_class_metrics.png}
-\caption{Class-wise Performance Metrics Comparison for Blood Cell Detection}
-\label{fig:blood_cell_class_metrics}
-\end{figure}
-
 \begin{multicols}{2}
 The superior performance on this dataset compared to the X-ray dataset can be attributed to several factors: (1) the larger dataset size providing more training examples, (2) the more distinctive visual characteristics of different blood cell types, and (3) the use of the larger YOLO v11l model variant with greater representational capacity.
 \end{multicols}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=1\linewidth]{datas/blood_cell_summary_datas/blood_cells_detect.png}
+\caption{Result for Blood Cell Detection}
+\label{fig:blood_cell_class_metrics}
+\end{figure}
 
 \subsubsection{Fruit Ripeness Detection Results}
 
@@ -203,9 +159,10 @@ The confusion matrix (Figure \ref{fig:fruit_confusion}) showed perfect classific
     \item The absence of overlapping objects or ambiguous cases
 \end{enumerate}
 \end{multicols}
+
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.8\linewidth]{datas/agriculture/confusion_matrix_normalized.png}
+\includegraphics[width=0.95\linewidth]{datas/agriculture/confusion_matrix_normalized.png}
 \caption{Confusion Matrix for Fruit Ripeness Classification}
 \label{fig:fruit_confusion}
 \end{figure}
@@ -224,34 +181,20 @@ Beyond quantitative metrics, we conducted qualitative assessments to understand 
 
 \subsubsection{COVID-19 X-ray Detection Analysis}
 
-Visual inspection of the COVID-19 detection results revealed several interesting patterns:
-
-\begin{itemize}
-    \item The model reliably identified normal X-rays with high confidence
-    \item For COVID-19 cases, the model sometimes focused on specific regions like ground-glass opacities but missed more subtle patterns
-    \item Confusion between COVID-19 and viral pneumonia typically occurred in cases with extensive bilateral involvement
-    \item Edge cases with atypical presentations posed the greatest challenge
-\end{itemize}
+Visual inspection of the COVID-19 detection results revealed several interesting patterns. The model reliably identified normal X-rays with high confidence. For COVID-19 cases, the model sometimes focused on specific regions like ground-glass opacities but missed more subtle patterns. Confusion between COVID-19 and viral pneumonia typically occurred in cases with extensive bilateral involvement. Edge cases with atypical presentations posed the greatest challenge for the model.
 
 These observations align with the quantitative results and highlight the inherent difficulty of COVID-19 diagnosis from X-rays, which is challenging even for expert radiologists. The model's performance, while not perfect, demonstrates potential as an assistive tool for preliminary screening or workload prioritization in clinical settings.
 
 \subsubsection{Blood Cell Detection Analysis}
 
-Qualitative analysis of blood cell detection results showed excellent performance in most scenarios, with a few notable observations:
-
-\begin{itemize}
-    \item WBCs were consistently detected with high confidence, likely due to their distinctive size and staining characteristics
-    \item RBC detection occasionally struggled in densely packed regions where cells overlap significantly
-    \item The model successfully identified platelets despite their smaller size, though with slightly lower confidence than the other cell types
-    \item Detection performance remained consistent across different staining intensities and image qualities
-\end{itemize}
+Qualitative analysis of blood cell detection results showed excellent performance in most scenarios, with a few notable observations. WBCs were consistently detected with high confidence, likely due to their distinctive size and staining characteristics. RBC detection occasionally struggled in densely packed regions where cells overlap significantly. The model successfully identified platelets despite their smaller size, though with slightly lower confidence than the other cell types. Detection performance remained consistent across different staining intensities and image qualities.
 
 The precision-recall curve (Figure \ref{fig:blood_cell_pr}) shows that the model maintained high precision even at high recall thresholds for all cell types, with WBCs exhibiting the best performance (mAP@50: 0.982) and RBCs showing the most gradual decline in precision as recall increased.
 \end{multicols}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.9\textwidth]{datas/blood_cell_summary_datas/blood_cells_PR_curve.png}
+\includegraphics[width=0.8\textwidth]{datas/blood_cell_summary_datas/blood_cells_PR_curve.png}
 \caption{Precision-Recall Curve for Blood Cell Detection}
 \label{fig:blood_cell_pr}
 \end{figure}
@@ -259,68 +202,22 @@ The precision-recall curve (Figure \ref{fig:blood_cell_pr}) shows that the model
 \begin{multicols}{2}
 \subsubsection{Fruit Ripeness Detection Analysis}
 
-The qualitative analysis of fruit ripeness detection showed exemplary performance across all categories:
-
-\begin{itemize}
-    \item The model correctly identified all fresh and rotten fruits with high confidence scores (typically > 0.93)
-    \item Detection remained accurate across various lighting conditions and backgrounds
-    \item The R-LBP preprocessing technique effectively highlighted textural changes in rotting fruits, enhancing detection reliability
-    \item Even early stages of decay were accurately classified as rotten, demonstrating sensitivity to subtle color and texture changes
-\end{itemize}
+The qualitative analysis of fruit ripeness detection showed exemplary performance across all categories. The model correctly identified all fresh and rotten fruits with high confidence scores (typically > 0.93). Detection remained accurate across various lighting conditions and backgrounds. The R-LBP preprocessing technique effectively highlighted textural changes in rotting fruits, enhancing detection reliability. Even early stages of decay were accurately classified as rotten, demonstrating sensitivity to subtle color and texture changes.
 
 As shown in Figure \ref{fig:fruit_examples}, both fresh and rotten fruits were correctly classified with high confidence scores. The model was particularly effective at detecting the distinctive discoloration and textural changes in rotten fruits, even when these changes were limited to a portion of the fruit.
 \end{multicols}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.9\textwidth]{datas/agriculture/labels.jpg}
+\includegraphics[width=0.8\textwidth]{datas/agriculture/Figure_1.png}
 \caption{Example Fruit Ripeness Detection Results}
 \label{fig:fruit_examples}
 \end{figure}
 
-\begin{multicols}{2}
-\subsection{Training Dynamics and Convergence Analysis}
-
-The training dynamics across the three applications revealed interesting patterns about YOLO v11's learning behavior in different domains.
-
-\subsubsection{COVID-19 X-ray Model Training}
-
-The COVID-19 detection model showed a typical learning pattern for a challenging task with limited data (Figure \ref{fig:covid_training}). The training loss decreased steadily but exhibited some fluctuations, suggesting the model struggled to find consistent patterns. The precision and recall metrics improved gradually but showed occasional instability, particularly in early epochs. By epoch 15, the validation metrics began to stabilize, indicating the model had extracted the most reliable patterns available in the limited dataset.
-\end{multicols}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.7\textwidth]{datas/x_ray_summary_datas/x_ray_results.png}
-\caption{Training Metrics for COVID-19 X-ray Detection Model}
-\label{fig:covid_training}
-\end{figure}
-
-\begin{multicols}{2}
-The training dynamics suggest that with more training data, especially of COVID-19 cases, the model's performance could potentially improve significantly. The relatively low recall (0.3035) indicates that the model is being conservative in its COVID-19 predictions, possibly due to the limited and varied examples of positive cases in the training set.
-
-\subsubsection{Blood Cell Detection Model Training}
-
-The blood cell model showed more stable and rapid convergence (Figure \ref{fig:blood_cell_training}), with both training and validation losses decreasing smoothly. Precision and recall metrics reached high values (>0.8) relatively early in training and continued to improve gradually throughout the 80 epochs. The mAP@50 metric showed the most consistent improvement, reaching 0.934 by the end of training.
-\end{multicols}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.7\textwidth]{datas/blood_cell_summary_datas/blood_cells_results.png}
-\caption{Training Metrics for Blood Cell Detection Model}
-\label{fig:blood_cell_training}
-\end{figure}
-
-\begin{multicols}{2}
-The longer training period (80 epochs) allowed the model to fine-tune its weights for optimal performance, particularly for challenging cases like overlapping RBCs. The smooth convergence curve suggests that the model benefited from the larger dataset size and the more distinctive visual characteristics of the different cell types.
-
-\subsubsection{Fruit Ripeness Detection Model Training}
-
-The fruit ripeness model exhibited the fastest and most stable convergence of all three applications (Figure \ref{fig:fruit_training}). The training and validation losses decreased rapidly in the first 5 epochs and continued to decline steadily thereafter. Remarkably, the precision and recall metrics reached near-perfect values (>0.99) by epoch 10 and remained stable for the remainder of training.
-\end{multicols}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.7\textwidth]{datas/agriculture/results.png}
+\includegraphics[width=0.82\textwidth]{datas/agriculture/results.png}
 \caption{Training Metrics for Fruit Ripeness Detection Model}
 \label{fig:fruit_training}
 \end{figure}
@@ -329,7 +226,6 @@ The fruit ripeness model exhibited the fastest and most stable convergence of al
 The mAP@50 and mAP@50-95 metrics showed similar rapid improvement, both exceeding 0.99 by the end of training. This exceptional training efficiency, achieved with the smallest model variant (YOLO v11n), demonstrates the relative simplicity of the fruit ripeness classification task compared to the medical imaging applications.
 
 \subsection{Impact of Model Size and Training Duration}
-
 Our experiments with different YOLO v11 variants (nano, medium, and large) across the three applications provided insights into the relationship between model size, training duration, and performance:
 
 \begin{enumerate}
