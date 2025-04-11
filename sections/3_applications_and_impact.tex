@@ -1,13 +1,47 @@
 {\color{gray}\hrule}
 \begin{center}
-\section{Applications And Impact}
-\textbf{Small description}
-\bigskip
+	\section{Applications And Impact}
+	\textbf{How YOLO transforms research and practice in biomedicine and agriculture}
+	\bigskip
 \end{center}
 {\color{gray}\hrule}
 \begin{multicols}{2}
-\subsection{Subsection}
-\lipsum[1-3]
-\subsection{Subsection}
-\lipsum[1-2]
+	The YOLO (You Only Look Once) object detection framework has proved remarkably adaptable across various fields, with especially promising uses in biomedical science and agriculture. This section examines how YOLO is applied in these domains, its actual and potential influence, and the obstacles that researchers and practitioners still need to overcome.
+
+	\subsection{Biomedical Applications}
+	\subsubsection{Cell Detection and Classification}
+	YOLO's application for cell detection marks a notable advancement in biomedical imaging analysis \citep{ChanCell2020}. Traditional approaches to cell detection and counting often depend on time-consuming manual work, which tends to be both tedious and susceptible to human error. The speed and accuracy of YOLO offer a valuable alternative to these conventional methods.
+
+	In both medical diagnostics and research contexts, where correctly identifying and categorizing cells is essential for testing and study, YOLO can reduce the burden of manual counting substantially \citep{electronics8030292}. This automation allows researchers and clinicians to process larger datasets more quickly, potentially speeding up discoveries and improving diagnostic results. The processing speed of YOLO—most evident in more recent versions such as YOLOv7, which can process up to 155 frames per second—makes it particularly useful for high-volume biomedical applications.
+
+	Medical applications do, however, present specific challenges for object detection systems. Such applications require exceptional accuracy, particularly when working with small objects like individual cells in microscopic images \citep{ChanCell2020}. The ongoing development of YOLO through its various versions has gradually addressed these challenges, with better small object detection becoming a key focus in versions such as YOLOv3, which added a pyramid architecture to better handle feature maps at different scales \citep{redmon2018yolov3}.
+
+	\subsubsection{Medical Imaging Analysis}
+	Beyond cell detection, YOLO's impact extends to wider medical imaging applications. The system's ability to identify objects quickly and accurately makes it valuable for uses ranging from tumor detection to identifying anatomical structures in radiological images \citep{electronics8030292}. The more precise location capabilities in later YOLO versions, especially through improvements in bounding box prediction, allow for more accurate marking of areas of interest in medical images.
+
+	The time-sensitive nature of many medical procedures makes YOLO's real-time processing especially valuable in clinical settings. For urgent diagnoses, the ability to analyze medical images quickly could improve patient outcomes by enabling faster medical interventions.
+
+	\subsection{Agricultural Applications}
+	\subsubsection{Fruit Ripeness Determination}
+	In agriculture, YOLO's application for determining fruit ripeness addresses a key aspect of crop management \citep{Koirala2019}. Accurately assessing when fruits are ripe helps farmers decide the best harvesting times, which directly affects both produce quality and farming efficiency.
+
+	Traditional ripeness assessment methods often rely on visual checks by farm workers, which can be inconsistent and subjective. By automating this process, YOLO offers the possibility of more objective and standardized ripeness evaluation \citep{KAMILARIS201870}. This has important implications for reducing food waste—a significant global issue—by ensuring that fruits are harvested at peak ripeness rather than too early or too late.
+
+	The quality of agricultural produce relates directly to harvesting at the right stage of ripeness. YOLO's ability to accurately classify ripeness stages can help improve food quality, potentially allowing for better market prices and higher consumer satisfaction.
+
+	\subsubsection{Challenges in Agricultural Implementation}
+	Despite its potential, using YOLO in agricultural settings poses unique challenges. Unlike controlled laboratory environments, agricultural applications must cope with variable outdoor conditions, including changing light, complex backgrounds with vegetation, and different weather conditions \citep{KAMILARIS201870}.
+
+	More recent YOLO versions have partly addressed these challenges. For example, YOLOv4 introduced Mosaic Data Augmentation, which combines multiple images to create diverse training scenarios, helping the model adapt better to different contexts—an important feature for agricultural applications where conditions rarely remain consistent \citep{bochkovskiy2020yolov4}. Similarly, YOLOv4's Self-Adversarial Training improves the model's resilience, potentially enhancing its performance in challenging agricultural environments.
+
+	\subsection{Broader Impact and Future Directions}
+	\subsubsection{Computational Efficiency and Accessibility}
+	One of the most notable aspects of YOLO's evolution has been the steady improvement in computational efficiency \citep{Ultralytics2024}. Earlier object detection systems required substantial computing resources, limiting their practical use in resource-limited settings. The continued refinement of YOLO has addressed this limitation, with versions like YOLOv7 using 50\% less computing power and 40\% fewer parameters while achieving better accuracy.
+
+	This improved efficiency has widened access to advanced object detection capabilities, making them available to more users and applications. For both biomedical and agricultural applications, this means that sophisticated image analysis can be used even in settings with limited computational resources, potentially extending these technologies to underserved areas.
+
+	\subsubsection{Integration with Other Technologies}
+	YOLO's impact goes beyond its standalone abilities \citep{8627998}. Its potential combination with other emerging technologies, such as Internet of Things (IoT) devices in agriculture or portable diagnostic tools in healthcare, creates new possibilities for real-time monitoring and analysis.
+
+	For instance, in agriculture, YOLO could work with automated harvesting systems, allowing selective harvesting based on ripeness detection \citep{Koirala2019}. In biomedical applications, integration with point-of-care diagnostic devices could bring advanced cell detection capabilities to remote or resource-limited healthcare settings \citep{ChanCell2020}.
 \end{multicols}
