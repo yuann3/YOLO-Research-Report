@@ -99,12 +99,11 @@ To rigorously evaluate model performance across applications, we employed these 
 \textbf{F1-Score}: $\text{F1-Score} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}$
 
 \textbf{Mean Average Precision (mAP@IoU)}: The mean of the AP values across all classes at a specific IoU threshold.
+\end{multicols}
 
 \subsubsection{COVID-19 X-ray Detection Results}
 
-The YOLO v11m model showed promising performance on the COVID-19 X-ray dataset, as summarized in Table \ref{tab:covid_results}.
-
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \begin{tabular}{|c|c|}
 \hline
@@ -122,29 +121,33 @@ FPS & 33.76 \\
 \label{tab:covid_results}
 \end{table}
 
-The class-wise performance analysis revealed significant variations across the three categories. The model performed best on the Normal class (class 1) with perfect precision (1.0) and a strong mAP@50 of 0.8278, while it struggled more with COVID-19 detection (class 0), achieving only 0.3035 recall despite a reasonable precision of 0.7669. Interestingly, the Viral Pneumonia class (class 2) showed a different pattern with high recall (0.8333) but lower precision (0.4713).
+\begin{multicols}{2}
+The YOLO v11m model showed promising performance on the COVID-19 X-ray dataset, as summarized in Table \ref{tab:covid_results}.
 
-\begin{figure}[h]
+The class-wise performance analysis revealed significant variations across the three categories. The model performed best on the Normal class (class 1) with perfect precision (1.0) and a strong mAP@50 of 0.8278, while it struggled more with COVID-19 detection (class 0), achieving only 0.3035 recall despite a reasonable precision of 0.7669. Interestingly, the Viral Pneumonia class (class 2) showed a different pattern with high recall (0.8333) but lower precision (0.4713).
+\end{multicols}
+
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.9\columnwidth]{datas/x_ray_summary_datas/x_ray_class_comparison.png}
+\includegraphics[width=0.7\textwidth]{datas/x_ray_summary_datas/x_ray_class_comparison.png}
 \caption{Class-wise Performance Metrics Comparison for COVID-19 X-ray Detection}
 \label{fig:covid_class_metrics}
 \end{figure}
 
+\begin{multicols}{2}
 The confusion matrix analysis (Figure \ref{fig:covid_confusion}) indicated a tendency for the model to misclassify some COVID-19 cases as Viral Pneumonia, which is understandable given the radiological similarities between these conditions. This suggests that while the model has learned to distinguish normal X-rays effectively, it requires further refinement to reliably differentiate between pathological conditions with similar radiographic presentations.
+\end{multicols}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.9\columnwidth]{datas/x_ray_summary_datas/x_ray_confusion_matrix_normalized.png}
+\includegraphics[width=0.7\textwidth]{datas/x_ray_summary_datas/x_ray_confusion_matrix_normalized.png}
 \caption{Confusion Matrix for COVID-19 X-ray Classification}
 \label{fig:covid_confusion}
 \end{figure}
 
 \subsubsection{Blood Cell Detection Results}
 
-The blood cell detection task yielded significantly better results, as detailed in Table \ref{tab:blood_cell_results}.
-
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \begin{tabular}{|c|c|}
 \hline
@@ -162,22 +165,26 @@ FPS & 38.45 \\
 \label{tab:blood_cell_results}
 \end{table}
 
-Class-wise analysis revealed that White Blood Cells (WBC) were detected with exceptional accuracy (precision: 0.952, recall: 1.000, F1-score: 0.975), likely due to their distinctive size and morphology. Red Blood Cells (RBC) proved more challenging with lower precision (0.736) but good recall (0.901), reflecting the difficulty in distinguishing individual RBCs in densely packed microscopy images. Platelets achieved balanced performance with precision and recall both around 0.87-0.88.
+\begin{multicols}{2}
+The blood cell detection task yielded significantly better results, as detailed in Table \ref{tab:blood_cell_results}.
 
-\begin{figure}[h]
+Class-wise analysis revealed that White Blood Cells (WBC) were detected with exceptional accuracy (precision: 0.952, recall: 1.000, F1-score: 0.975), likely due to their distinctive size and morphology. Red Blood Cells (RBC) proved more challenging with lower precision (0.736) but good recall (0.901), reflecting the difficulty in distinguishing individual RBCs in densely packed microscopy images. Platelets achieved balanced performance with precision and recall both around 0.87-0.88.
+\end{multicols}
+
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.9\columnwidth]{datas/blood_cell_summary_datas/blood_cells_class_metrics.png}
+\includegraphics[width=0.7\textwidth]{datas/blood_cell_summary_datas/blood_cells_class_metrics.png}
 \caption{Class-wise Performance Metrics Comparison for Blood Cell Detection}
 \label{fig:blood_cell_class_metrics}
 \end{figure}
 
+\begin{multicols}{2}
 The superior performance on this dataset compared to the X-ray dataset can be attributed to several factors: (1) the larger dataset size providing more training examples, (2) the more distinctive visual characteristics of different blood cell types, and (3) the use of the larger YOLO v11l model variant with greater representational capacity.
+\end{multicols}
 
 \subsubsection{Fruit Ripeness Detection Results}
 
-The fruit ripeness detection model achieved the most impressive results of all three applications, with near-perfect performance across all metrics:
-
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \begin{tabular}{|c|c|}
 \hline
@@ -194,6 +201,9 @@ Processing Time & ~5-7 ms/image (with GPU) \\
 \label{tab:fruit_results}
 \end{table}
 
+\begin{multicols}{2}
+The fruit ripeness detection model achieved the most impressive results of all three applications, with near-perfect performance across all metrics, as shown in Table \ref{tab:fruit_results}.
+
 The confusion matrix (Figure \ref{fig:fruit_confusion}) showed perfect classification accuracy for all six categories (Fresh Apple, Fresh Banana, Fresh Orange, Rotten Apple, Rotten Banana, and Rotten Orange), with no misclassifications observed. This exceptional performance can be attributed to:
 
 \begin{enumerate}
@@ -202,14 +212,16 @@ The confusion matrix (Figure \ref{fig:fruit_confusion}) showed perfect classific
     \item The well-balanced dataset with clear examples of each class
     \item The absence of overlapping objects or ambiguous cases
 \end{enumerate}
+\end{multicols}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.9\columnwidth]{datas/agriculture/confusion_matrix_normalized.png}
+\includegraphics[width=0.7\textwidth]{datas/agriculture/confusion_matrix_normalized.png}
 \caption{Confusion Matrix for Fruit Ripeness Classification}
 \label{fig:fruit_confusion}
 \end{figure}
 
+\begin{multicols}{2}
 It's worth noting that despite using the smallest model variant (YOLO v11n), the fruit ripeness detection achieved the highest accuracy, demonstrating that model size is not always the determining factor for performance when the visual features are sufficiently distinctive.
 
 \subsubsection{Cross-Application Performance Comparison}
@@ -247,14 +259,16 @@ Qualitative analysis of blood cell detection results showed excellent performanc
 \end{itemize}
 
 The precision-recall curve (Figure \ref{fig:blood_cell_pr}) shows that the model maintained high precision even at high recall thresholds for all cell types, with WBCs exhibiting the best performance (mAP@50: 0.982) and RBCs showing the most gradual decline in precision as recall increased.
+\end{multicols}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.9\columnwidth]{datas/blood_cell_summary_datas/blood_cells_PR_curve.png}
+\includegraphics[width=0.7\textwidth]{datas/blood_cell_summary_datas/blood_cells_PR_curve.png}
 \caption{Precision-Recall Curve for Blood Cell Detection}
 \label{fig:blood_cell_pr}
 \end{figure}
 
+\begin{multicols}{2}
 \subsubsection{Fruit Ripeness Detection Analysis}
 
 The qualitative analysis of fruit ripeness detection showed exemplary performance across all categories:
@@ -267,14 +281,16 @@ The qualitative analysis of fruit ripeness detection showed exemplary performanc
 \end{itemize}
 
 As shown in Figure \ref{fig:fruit_examples}, both fresh and rotten fruits were correctly classified with high confidence scores. The model was particularly effective at detecting the distinctive discoloration and textural changes in rotten fruits, even when these changes were limited to a portion of the fruit.
+\end{multicols}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.9\columnwidth]{datas/agriculture/labels.jpg}
+\includegraphics[width=0.7\textwidth]{datas/agriculture/labels.jpg}
 \caption{Example Fruit Ripeness Detection Results}
 \label{fig:fruit_examples}
 \end{figure}
 
+\begin{multicols}{2}
 \subsection{Training Dynamics and Convergence Analysis}
 
 The training dynamics across the three applications revealed interesting patterns about YOLO v11's learning behavior in different domains.
@@ -282,40 +298,46 @@ The training dynamics across the three applications revealed interesting pattern
 \subsubsection{COVID-19 X-ray Model Training}
 
 The COVID-19 detection model showed a typical learning pattern for a challenging task with limited data (Figure \ref{fig:covid_training}). The training loss decreased steadily but exhibited some fluctuations, suggesting the model struggled to find consistent patterns. The precision and recall metrics improved gradually but showed occasional instability, particularly in early epochs. By epoch 15, the validation metrics began to stabilize, indicating the model had extracted the most reliable patterns available in the limited dataset.
+\end{multicols}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.9\columnwidth]{datas/x_ray_summary_datas/x_ray_results.png}
+\includegraphics[width=0.7\textwidth]{datas/x_ray_summary_datas/x_ray_results.png}
 \caption{Training Metrics for COVID-19 X-ray Detection Model}
 \label{fig:covid_training}
 \end{figure}
 
+\begin{multicols}{2}
 The training dynamics suggest that with more training data, especially of COVID-19 cases, the model's performance could potentially improve significantly. The relatively low recall (0.3035) indicates that the model is being conservative in its COVID-19 predictions, possibly due to the limited and varied examples of positive cases in the training set.
 
 \subsubsection{Blood Cell Detection Model Training}
 
 The blood cell model showed more stable and rapid convergence (Figure \ref{fig:blood_cell_training}), with both training and validation losses decreasing smoothly. Precision and recall metrics reached high values (>0.8) relatively early in training and continued to improve gradually throughout the 80 epochs. The mAP@50 metric showed the most consistent improvement, reaching 0.934 by the end of training.
+\end{multicols}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.9\columnwidth]{datas/blood_cell_summary_datas/blood_cells_results.png}
+\includegraphics[width=0.7\textwidth]{datas/blood_cell_summary_datas/blood_cells_results.png}
 \caption{Training Metrics for Blood Cell Detection Model}
 \label{fig:blood_cell_training}
 \end{figure}
 
+\begin{multicols}{2}
 The longer training period (80 epochs) allowed the model to fine-tune its weights for optimal performance, particularly for challenging cases like overlapping RBCs. The smooth convergence curve suggests that the model benefited from the larger dataset size and the more distinctive visual characteristics of the different cell types.
 
 \subsubsection{Fruit Ripeness Detection Model Training}
 
 The fruit ripeness model exhibited the fastest and most stable convergence of all three applications (Figure \ref{fig:fruit_training}). The training and validation losses decreased rapidly in the first 5 epochs and continued to decline steadily thereafter. Remarkably, the precision and recall metrics reached near-perfect values (>0.99) by epoch 10 and remained stable for the remainder of training.
+\end{multicols}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.9\columnwidth]{datas/agriculture/results.png}
+\includegraphics[width=0.7\textwidth]{datas/agriculture/results.png}
 \caption{Training Metrics for Fruit Ripeness Detection Model}
 \label{fig:fruit_training}
 \end{figure}
 
+\begin{multicols}{2}
 The mAP@50 and mAP@50-95 metrics showed similar rapid improvement, both exceeding 0.99 by the end of training. This exceptional training efficiency, achieved with the smallest model variant (YOLO v11n), demonstrates the relative simplicity of the fruit ripeness classification task compared to the medical imaging applications.
 
 \subsection{Impact of Model Size and Training Duration}
