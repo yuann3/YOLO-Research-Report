@@ -29,6 +29,34 @@
 \usepackage{parskip}
 \usepackage{amsmath}
 \usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{blue!70!black}\bfseries,
+  commentstyle=\color{green!60!black}\itshape,
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\scriptsize\color{gray!70!black},
+  stepnumber=1,
+  numbersep=8pt,
+  backgroundcolor=\color{gray!5},
+  tabsize=2,
+  showspaces=false,
+  showstringspaces=false,
+  breaklines=true,
+  breakatwhitespace=true,
+  frame=leftline,
+  framesep=3pt,
+  framerule=1pt,
+  rulecolor=\color{gray!40},
+  captionpos=b,
+  xleftmargin=15pt,
+  aboveskip=10pt,
+  belowskip=10pt,
+  lineskip=1pt
+}
+
 \setlength\columnsep{18pt}
 \renewenvironment{abstract}
  {\begin{center}
@@ -76,4 +104,5 @@
 \input{./sections/6_future_directions_and_conclusion.tex}
 \bibliographystyle{apalike}
 \bibliography{references}
+\input{./sections/appendix_code.tex}
 \end{document}

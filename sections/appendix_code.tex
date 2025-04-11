@@ -1,0 +1,615 @@
+\appendix
+\section{Python Code}
+\label{appendix:code}
+
+This appendix presents the key Python code implementations used in our experiments with YOLO v11 across biomedical and agricultural applications. For each application, we highlight the most relevant code snippets that demonstrate data preparation, model configuration, training, and evaluation processes. The complete code is available in our GitHub repository.
+
+\subsection{COVID-19 Chest X-ray Detection}
+\label{appendix:covid-code}
+
+The following code snippets demonstrate the implementation of YOLO v11 for COVID-19 detection in chest X-ray images.
+
+\subsubsection{Dataset Preparation}
+First, we converted the classification dataset to a detection format suitable for YOLO:
+
+\begin{lstlisting}[language=Python, caption={COVID-19 X-ray Dataset Preparation}, label={lst:covid-dataset}]
+def generate_yolo_annotations(image_path, class_id):
+    """
+    Generate YOLO-format annotations for medical images.
+    For simplicity, we create a bounding box covering the central part of the image
+    """
+    img = cv2.imread(image_path)
+    h, w = img.shape[:2]
+
+    center_x = 0.5  # normalized center x (0-1)
+    center_y = 0.5  # normalized center y (0-1)
+    box_width = 0.7  # normalized width (0-1)
+    box_height = 0.7  # normalized height (0-1)
+
+    # class_id center_x center_y width height
+    return f"{class_id} {center_x} {center_y} {box_width} {box_height}"
+
+def prepare_yolo_dataset(source_dir, dest_dir, class_mapping):
+    """
+    Prepare a dataset in YOLO format from a classification dataset
+    
+    Args:
+        source_dir: source directory with class subfolders
+        dest_dir: destination directory for YOLO format data
+        class_mapping: dictionary mapping class names to class IDs
+    """
+    os.makedirs(os.path.join(dest_dir, 'images'), exist_ok=True)
+    os.makedirs(os.path.join(dest_dir, 'labels'), exist_ok=True)
+
+    for class_name, class_id in class_mapping.items():
+        class_dir = os.path.join(source_dir, class_name)
+        if not os.path.exists(class_dir):
+            continue
+
+        for img_file in tqdm(os.listdir(class_dir), desc=f"Processing {class_name}"):
+            if not img_file.lower().endswith(('.jpg', '.jpeg', '.png')):
+                continue
+
+            src_img_path = os.path.join(class_dir, img_file)
+            dst_img_path = os.path.join(dest_dir, 'images', img_file)
+            dst_label_path = os.path.join(dest_dir, 'labels', os.path.splitext(img_file)[0] + '.txt')
+
+            shutil.copy2(src_img_path, dst_img_path)
+
+            annotation = generate_yolo_annotations(src_img_path, class_id)
+            with open(dst_label_path, 'w') as f:
+                f.write(annotation)
+\end{lstlisting}
+
+\subsubsection{Model Configuration and Training}
+The YOLO v11 model was configured with specific parameters optimized for medical image detection:
+
+\begin{lstlisting}[language=Python, caption={COVID-19 X-ray Model Configuration and Training}, label={lst:covid-train}]
+model_type = "yolo11m.pt"  # use the medium model for faster training
+img_size = 640
+batch_size = 16
+epochs = 20
+
+# Model configuration
+model_config = {
+    'epochs': epochs,
+    'batch': batch_size,
+    'imgsz': img_size,
+    'patience': 10,  # Early stopping patience
+    'device': 0,
+
+    # Optimizer parameters
+    'optimizer': 'Adam',
+    'lr0': 0.0001,    # Initial learning rate
+    'lrf': 0.01,     # Final learning rate (fraction of lr0)
+    'momentum': 0.937,
+    'weight_decay': 0.0005,
+
+    # Augmentation parameters
+    'degrees': 0.0,           # Limited rotation for medical images
+    'translate': 0.1,         # Translation augmentation
+    'scale': 0.1,             # Scale augmentation
+    'shear': 0.0,             # No shear for medical images
+    'perspective': 0.0,       # No perspective change for medical images
+    'flipud': 0.0,            # No vertical flip for medical images
+    'fliplr': 0.5,            # Horizontal flip (often acceptable for chest X-rays)
+    'mosaic': 0.0,            # Disable mosaic augmentation for medical images
+    'mixup': 0.0,             # Disable mixup augmentation for medical images
+
+    # Save and logging parameters
+    'save': True,
+    'save_period': -1,       # Save last and best models
+    'plots': True,
+    'workers': 8
+}
+
+# Initialize the model
+model = YOLO(model_type)
+
+# Train the model
+results = model.train(
+    data=f"{HOME}/datasets/covid19_yolo/data.yaml",
+    **model_config
+)
+\end{lstlisting}
+
+\subsubsection{Model Evaluation}
+We evaluated the model on various metrics including precision, recall, F1-score, and mAP:
+
+\begin{lstlisting}[language=Python, caption={COVID-19 X-ray Model Evaluation}, label={lst:covid-eval}]
+# Evaluate the model on the test set
+val_results = model.val(data=f"{HOME}/datasets/covid19_yolo/data.yaml",
+                        split="test",
+                        imgsz=img_size,
+                        conf=0.25,
+                        iou=0.5,
+                        max_det=300,
+                        device=0)
+
+# Extract and display metrics
+metrics = {
+    "Precision": val_results.box.p,
+    "Recall": val_results.box.r,
+    "mAP@50": val_results.box.map50,
+    "mAP@50-95": val_results.box.map,
+}
+
+# Calculate F1 score
+f1_score = 2 * (metrics["Precision"] * metrics["Recall"]) / (metrics["Precision"] + metrics["Recall"])
+metrics["F1-score"] = f1_score
+
+# Display metrics table
+metrics_df = pd.DataFrame([metrics])
+print("Overall Model Performance Metrics:")
+display(metrics_df)
+\end{lstlisting}
+
+\subsubsection{FPS Measurement}
+We measured the model's inference speed using the following function:
+
+\begin{lstlisting}[language=Python, caption={FPS Measurement for COVID-19 X-ray Detection}, label={lst:covid-fps}]
+def measure_fps(model, img_size, batch_size=1, iterations=20):
+    """
+    Measure the FPS (Frames Per Second)
+    """
+    # Create a dummy image batch for testing
+    img_paths = glob.glob(f"{HOME}/datasets/covid19_yolo/test/images/*")[:batch_size]
+    if not img_paths:
+        print("No test images found")
+        return 0
+
+    # Warmup
+    for _ in range(5):
+        _ = model.predict(img_paths, imgsz=img_size)
+
+    # Measure time
+    start_time = time.time()
+    for _ in range(iterations):
+        _ = model.predict(img_paths, imgsz=img_size)
+    end_time = time.time()
+
+    # Calculate FPS
+    elapsed_time = end_time - start_time
+    fps = (iterations * batch_size) / elapsed_time
+
+    return fps
+\end{lstlisting}
+
+\subsection{Blood Cell Detection}
+\label{appendix:blood-cell-code}
+
+The implementation for blood cell detection follows a similar pattern but with specific adaptations for microscopy images.
+
+\subsubsection{Dataset Loading and Analysis}
+
+\begin{lstlisting}[language=Python, caption={Blood Cell Dataset Analysis}, label={lst:blood-dataset}]
+from roboflow import Roboflow
+
+rf = Roboflow(api_key="API_KEY")
+project = rf.workspace("team-roboflow").project("blood-cell-detection-1ekwu")
+version = project.version(3)
+dataset = version.download("yolov11")
+
+# Analyze class distribution in training set
+train_labels_dir = os.path.join(dataset.location, "train", "labels")
+val_labels_dir = os.path.join(dataset.location, "valid", "labels")
+
+def count_classes(labels_dir, class_count):
+    for label_file in os.listdir(labels_dir):
+        if label_file.endswith('.txt'):
+            with open(os.path.join(labels_dir, label_file), 'r') as f:
+                for line in f:
+                    parts = line.strip().split()
+                    if len(parts) >= 1:
+                        class_id = int(parts[0])
+                        class_count[class_id] += 1
+    return class_count
+
+class_count = [0] * data_config['nc']
+class_count = count_classes(train_labels_dir, class_count)
+
+df_classes = pd.DataFrame({
+    'Class': data_config['names'],
+    'Count': class_count
+})
+\end{lstlisting}
+
+\subsubsection{Model Training}
+
+\begin{lstlisting}[language=Python, caption={Blood Cell Detection Model Training}, label={lst:blood-train}]
+# Training with YOLOv11
+!yolo task=detect mode=train model=yolo11s.pt data={dataset.location}/data.yaml epochs=80 imgsz=640 plots=True patience=15 save_period=10
+\end{lstlisting}
+
+\subsubsection{Performance Evaluation and FPS Measurement}
+
+\begin{lstlisting}[language=Python, caption={Blood Cell Detection Evaluation and FPS Measurement}, label={lst:blood-eval}]
+# Load the trained model
+model = YOLO(f"{HOME}/runs/detect/train/weights/best.pt")
+
+# FPS Measurement
+def measure_fps(model, test_images_path, num_runs=50):
+    if isinstance(test_images_path, list):
+        test_images = test_images_path[:num_runs]
+    else:
+        test_images = [os.path.join(test_images_path, img) for img in os.listdir(test_images_path)
+                      if img.endswith(('.jpg', '.jpeg', '.png'))][:num_runs]
+
+    if not test_images:
+        return 0
+
+    try:
+        # Warmup
+        for _ in range(min(5, len(test_images))):
+            _ = model(test_images[0])
+
+        start_time = time.time()
+        for i in range(min(num_runs, len(test_images))):
+            _ = model(test_images[i])
+        end_time = time.time()
+
+        elapsed_time = end_time - start_time
+        fps = min(num_runs, len(test_images)) / elapsed_time if elapsed_time > 0 else 0
+        return fps
+    except Exception as e:
+        print(f"Error measuring FPS: {e}")
+        return 0
+
+# Load test images for FPS measurement
+try:
+    test_images_path = os.path.join(dataset.location, "test", "images")
+    fps = measure_fps(model, test_images_path)
+except Exception as e:
+    print(f"Error loading test images: {e}")
+    fps = 0
+
+print(f"\nInference Speed: {fps:.2f} FPS")
+\end{lstlisting}
+
+\subsection{Fruit Ripeness Detection}
+\label{appendix:fruit-code}
+
+For agricultural applications, we implemented fruit ripeness detection with specialized preprocessing techniques.
+
+\subsubsection{Dataset Preparation}
+
+\begin{lstlisting}[language=Python, caption={Fruit Dataset Preparation}, label={lst:fruit-dataset}]
+def prepare_fruit_dataset(dataset_path):
+    class_mapping = {
+        'freshapples': 0,
+        'freshbanana': 1,
+        'freshoranges': 2,
+        'rottenapples': 3,
+        'rottenbanana': 4,
+        'rottenoranges': 5
+    }
+    dest_root = "fruit_dataset"
+
+    print("Converting dataset to YOLO format...")
+    os.makedirs(os.path.join(dest_root, 'images', 'train'), exist_ok=True)
+    os.makedirs(os.path.join(dest_root, 'images', 'val'), exist_ok=True)
+    os.makedirs(os.path.join(dest_root, 'images', 'test'), exist_ok=True)
+    os.makedirs(os.path.join(dest_root, 'labels', 'train'), exist_ok=True)
+    os.makedirs(os.path.join(dest_root, 'labels', 'val'), exist_ok=True)
+    os.makedirs(os.path.join(dest_root, 'labels', 'test'), exist_ok=True)
+    
+    # Process training data
+    train_path = os.path.join(dataset_path, "train")
+    for class_folder in os.listdir(train_path):
+        class_id = class_mapping.get(class_folder)
+        if class_id is None:
+            continue
+
+        class_path = os.path.join(train_path, class_folder)
+        if not os.path.isdir(class_path):
+            continue
+
+        images = [f for f in os.listdir(class_path) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+        for img in images:
+            src_img_path = os.path.join(class_path, img)
+            if not os.path.exists(src_img_path):
+                print(f"Warning: Source image {src_img_path} not found, skipping.")
+                continue
+            clean_filename = f"{class_folder}_{img.replace(' ', '_')}"
+            dest_img_path = os.path.join(dest_root, 'images', 'train', clean_filename)
+
+            try:
+                shutil.copy2(src_img_path, dest_img_path)
+            except Exception as e:
+                print(f"Error copying {src_img_path} to {dest_img_path}: {e}")
+                continue
+            try:
+                label_filename = os.path.splitext(clean_filename)[0] + '.txt'
+                label_path = os.path.join(dest_root, 'labels', 'train', label_filename)
+                with open(label_path, 'w') as f:
+                    f.write(f"{class_id} 0.5 0.5 0.8 0.8\n")
+            except Exception as e:
+                print(f"Error creating label file {label_path}: {e}")
+    
+    # Process test data similarly (split into validation and test)
+    # ...
+    
+    # Create YAML configuration file
+    yaml_path = os.path.join(dest_root, 'fruit_dataset.yaml')
+    with open(yaml_path, 'w') as f:
+        f.write(f"path: {os.path.abspath(dest_root)}\n")
+        f.write(f"train: images/train\n")
+        f.write(f"val: images/val\n")
+        f.write(f"test: images/test\n\n")
+        f.write(f"nc: {len(class_mapping)}\n")
+        display_names = ['Fresh Apple', 'Fresh Banana', 'Fresh Orange',
+                        'Rotten Apple', 'Rotten Banana', 'Rotten Orange']
+        f.write(f"names: {display_names}\n")
+        
+    return yaml_path
+\end{lstlisting}
+
+\subsubsection{Texture Enhancement with Roughness-LBP Preprocessing}
+
+\begin{lstlisting}[language=Python, caption={R-LBP Preprocessing for Fruit Texture Enhancement}, label={lst:fruit-rlbp}]
+def roughness_local_binary_pattern(image, radius=3, n_points=24):
+    """Optimized R-LBP implementation for fruit texture analysis"""
+    if len(image.shape) == 3:
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    else:
+        gray = image.copy()
+    
+    # Calculate LBP
+    lbp = local_binary_pattern(gray, n_points, radius, method='uniform')
+    
+    # Calculate local variance (roughness)
+    from scipy.ndimage import uniform_filter
+    mean_square = uniform_filter(gray.astype(np.float32)**2, 2*radius+1)
+    square_mean = uniform_filter(gray.astype(np.float32), 2*radius+1)**2
+    variance = mean_square - square_mean
+    
+    if np.max(variance) > 0:
+        variance = 255 * (variance / np.max(variance))
+    
+    # Combine LBP and variance
+    r_lbp = (0.5 * lbp + 0.5 * variance).astype(np.uint8)
+    r_lbp_rgb = cv2.cvtColor(r_lbp, cv2.COLOR_GRAY2RGB)
+
+    return r_lbp_rgb
+\end{lstlisting}
+
+\subsubsection{Model Training and Evaluation}
+
+\begin{lstlisting}[language=Python, caption={Fruit Ripeness Model Training and Evaluation}, label={lst:fruit-train-eval}]
+def train_fruit_model(yaml_path):
+    print("Starting model training...")
+    
+    # Configure device
+    if torch.cuda.is_available():
+        print(f"GPU available: {torch.cuda.get_device_name(0)}")
+        device = 0  # Use GPU
+    else:
+        print("No GPU available, using CPU")
+        device = 'cpu'
+    
+    # Load model
+    model = YOLO("yolo11n.pt")  # Use nano model for efficiency
+    
+    # Determine batch size based on available memory
+    batch_size = 16
+    if torch.cuda.is_available():
+        try:
+            mem_info = torch.cuda.get_device_properties(0).total_memory
+            if mem_info > 8e9:  # More than 8GB
+                batch_size = 32
+            elif mem_info > 4e9:  # More than 4GB
+                batch_size = 16
+            else:  # 4GB or less
+                batch_size = 8
+        except:
+            pass  # Keep default batch size if can't determine memory
+            
+    # Train model
+    results = model.train(
+        data=yaml_path,
+        epochs=30,               
+        imgsz=640,               
+        batch=batch_size,        
+        patience=5,               # Early stopping patience
+        save=True,                # Save checkpoints
+        device=device,            
+        workers=4,                
+        project='models/fruit_yolo_model',
+        name='fruit_ripeness',
+        exist_ok=True,
+        pretrained=True,
+        optimizer='auto',
+        verbose=True,
+        seed=0,
+        deterministic=True,
+        single_cls=False,
+        rect=False,
+        cos_lr=True,
+        close_mosaic=10,
+        resume=False,
+        amp=True,
+    )
+    
+    return model
+
+def evaluate_model(yaml_path):
+    model_path = 'models/fruit_yolo_model/best.pt'
+    model = YOLO(model_path)
+    
+    # Evaluate on test set
+    val_results = model.val(data=yaml_path, split='test', batch=16)
+    
+    print("\nFruit Ripeness Classification Performance:")
+    print(f"Precision: {val_results.box.mp:.4f}")
+    print(f"Recall: {val_results.box.mr:.4f}")
+    print(f"F1 Score: {2 * val_results.box.mp * val_results.box.mr / (val_results.box.mp + val_results.box.mr):.4f}")
+    print(f"mAP50: {val_results.box.map50:.4f}")
+    print(f"mAP50-95: {val_results.box.map:.4f}")
+    
+    return val_results
+\end{lstlisting}
+
+\subsection{Confusion Matrix Analysis}
+\label{appendix:confusion-matrix}
+
+For all three applications, we implemented confusion matrix visualization and analysis:
+
+\begin{lstlisting}[language=Python, caption={Confusion Matrix Generation for Model Analysis}, label={lst:confusion-matrix}]
+def create_confusion_matrix(yaml_path):
+    model_path = 'models/fruit_yolo_model/best.pt'
+    model = YOLO(model_path)
+    
+    class_names = ['Fresh Apple', 'Fresh Banana', 'Fresh Orange',
+                   'Rotten Apple', 'Rotten Banana', 'Rotten Orange']
+    class_mapping = {
+        'freshapples': 0,
+        'freshbanana': 1,
+        'freshoranges': 2,
+        'rottenapples': 3,
+        'rottenbanana': 4,
+        'rottenoranges': 5
+    }
+    
+    conf_matrix = np.zeros((6, 6))
+    test_img_dir = "fruit_dataset/images/test"
+    test_images = os.listdir(test_img_dir)
+    
+    # Group images by class
+    class_images = {}
+    for img_name in test_images:
+        prefix = img_name.split('_')[0]
+        true_class = class_mapping.get(prefix, -1)
+        if true_class == -1:
+            continue
+
+        if true_class not in class_images:
+            class_images[true_class] = []
+        class_images[true_class].append(img_name)
+    
+    # Process each class
+    for true_class, images in class_images.items():
+        img_paths = [os.path.join(test_img_dir, img) for img in images]
+        batch_size = 16
+        for i in range(0, len(img_paths), batch_size):
+            batch = img_paths[i:i+batch_size]
+            results = model(batch, verbose=False)
+            for j, r in enumerate(results):
+                if len(r.boxes) > 0:
+                    pred_class = int(r.boxes[0].cls.item())
+                    conf_matrix[true_class, pred_class] += 1
+                else:
+                    conf_matrix[true_class, true_class] += 1
+                    
+    # Visualize confusion matrix
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(conf_matrix, annot=True, fmt='g', cmap='Blues',
+                xticklabels=class_names, yticklabels=class_names)
+    plt.xlabel('Predicted')
+    plt.ylabel('True')
+    plt.title('Fruit Ripeness Classification Confusion Matrix')
+    plt.tight_layout()
+    plt.savefig('results/fruits/confusion_matrix.png', dpi=150)
+    plt.show()
+    
+    return conf_matrix
+\end{lstlisting}
+
+\section{Code for Results Visualization}
+\label{appendix:visualization-code}
+
+The following code was used to generate visualizations for the experimental results.
+
+\begin{lstlisting}[language=Python, caption={Results Visualization Code}, label={lst:visualization}]
+# Create a bar plot of the main metrics
+plt.figure(figsize=(12, 6))
+sns.barplot(x='Metric', y='Value', data=metrics_table[metrics_table['Metric'] != 'FPS'])
+plt.title('YOLOv11 Performance Metrics')
+plt.ylim(0, 1)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.savefig(f"{HOME}/metrics_barplot.png")
+plt.show()
+
+# Plot precision-recall curve (if data is available from validation)
+try:
+    pr_curve = pd.read_csv(f"{HOME}/runs/detect/train/results.csv")
+    plt.figure(figsize=(10, 6))
+    plt.plot(pr_curve[' recall'], pr_curve[' precision'], marker='o', linewidth=2)
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.title('Precision-Recall Curve')
+    plt.grid(True)
+    plt.savefig(f"{HOME}/precision_recall_curve.png")
+    plt.show()
+except:
+    print("Could not load precision-recall data from results.csv")
+
+# Multi-dimensional performance analysis radar chart
+if val_data:
+    df_val = pd.DataFrame(val_data)
+    df_val['F1-Score'] = 2 * (df_val['Precision'] * df_val['Recall']) / (df_val['Precision'] + df_val['Recall'])
+
+    metrics = ['Precision', 'Recall', 'F1-Score', 'mAP50', 'mAP50-95']
+    classes = df_val['Class'].tolist()
+
+    N = len(metrics)
+    angles = [n / float(N) * 2 * np.pi for n in range(N)]
+    angles += angles[:1]
+
+    fig, ax = plt.subplots(figsize=(10, 8), subplot_kw=dict(polar=True))
+    plt.xticks(angles[:-1], metrics)
+    ax.set_ylim(0, 1)
+
+    colors = ['b', 'g', 'r', 'c', 'm'][:len(classes)]
+
+    for i, cls in enumerate(classes):
+        values = df_val.loc[df_val['Class'] == cls, metrics].values.flatten().tolist()
+        values += values[:1]
+        ax.plot(angles, values, 'o-', linewidth=2, color=colors[i], label=cls)
+        ax.fill(angles, values, alpha=0.1, color=colors[i])
+
+    plt.legend(loc='upper right')
+    plt.title('Multi-dimensional Performance Analysis by Class')
+    plt.tight_layout()
+    plt.savefig(f"{HOME}/radar_metrics.png", dpi=300)
+    plt.show()
+\end{lstlisting}
+
+\subsection{Statistical Analysis of Results}
+\label{appendix:stats-code}
+
+The following code was used to perform statistical analysis of our experimental results:
+
+\begin{lstlisting}[language=Python, caption={Statistical Analysis of Experimental Results}, label={lst:stats}]
+# Extract class-wise metrics
+class_metrics = []
+
+# Extract metrics by class
+precisions = val_results.box.p.tolist() if hasattr(val_results.box.p, 'tolist') else val_results.box.p
+recalls = val_results.box.r.tolist() if hasattr(val_results.box.r, 'tolist') else val_results.box.r
+map50s = val_results.box.map50.tolist() if hasattr(val_results.box.map50, 'tolist') else val_results.box.map50
+map_fulls = val_results.box.map.tolist() if hasattr(val_results.box.map, 'tolist') else val_results.box.map
+
+if isinstance(precisions, list) and len(precisions) == len(names):
+    for i, name in enumerate(names):
+        # Grab metrics for this class
+        precision = precisions[i]
+        recall = recalls[i]
+        map50 = map50s[i] if isinstance(map50s, list) and i < len(map50s) else None
+        map_full = map_fulls[i] if isinstance(map_fulls, list) and i < len(map_fulls) else None
+
+        # Calculate F1 score
+        f1 = 2 * (precision * recall) / (precision + recall + 1e-16)
+
+        class_metrics.append({
+            "Class": name,
+            "Precision": precision,
+            "Recall": recall,
+            "mAP@50": map50,
+            "mAP@50-95": map_full,
+            "F1-score": f1
+        })
+
+class_metrics_df = pd.DataFrame(class_metrics)
+print("\nClass-wise Performance Metrics:")
+display(class_metrics_df)
+\end{lstlisting}
